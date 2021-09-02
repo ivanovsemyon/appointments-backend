@@ -1,9 +1,11 @@
 const { Schema, connect, model } = require("mongoose");
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
 const userSchema = new Schema({
   login: String,
   password: String,
+  token: String,
 });
 
 connect(
@@ -48,12 +50,41 @@ module.exports.register = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 4);
 
-    await User.create({
+    const user = await User.create({
       login: login,
       password: hashedPassword,
     });
-    res.send("Пользователь создан");
+
+    user.token = await jwt.sign(
+      { login: user.login, password: user.password },
+      "secret",
+      {
+        expiresIn: "2h",
+      }
+    );
+    res.status(201).json({ login: user.login, token: user.token });
   } else {
     res.status(400).send("Введите корректные данные");
+  }
+};
+
+module.exports.login = async (req, res) => {
+  const { login, password } = req.body;
+  if (login && password) {
+    const user = await User.findOne({ login });
+    if (user && (await bcrypt.compare(password, user.password))) {
+      user.token = await jwt.sign(
+        { login: user.login, token: user.token },
+        "secret",
+        {
+          expiresIn: "2h",
+        }
+      );
+      res.status(201).json({ login: user.login, token: user.token });
+    } else {
+      res.status(400).send({ error: "Логин или пароль не верны" });
+    }
+  } else {
+    res.status(400).send({ error: "Недостаточно данных" });
   }
 };
