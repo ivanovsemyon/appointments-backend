@@ -8,6 +8,13 @@ const userSchema = new Schema({
   token: String,
 });
 
+const appointmentsSchema = new Schema({
+  name: String,
+  doctor: String,
+  date: String,
+  complaint: String,
+});
+
 connect(
   "mongodb+srv://semyonivanov:semyonivanov@cluster0.6g7e8.mongodb.net/Appointments?retryWrites=true&w=majority",
   {
@@ -16,6 +23,7 @@ connect(
   }
 );
 
+const Appointments = model("appointments", appointmentsSchema);
 const User = model("users", userSchema);
 
 module.exports.register = async (req, res) => {
@@ -87,4 +95,21 @@ module.exports.login = async (req, res) => {
   } else {
     res.status(400).send({ error: "Недостаточно данных" });
   }
+};
+
+module.exports.getAllAppointments = async (req, res) => {
+  Appointments.find().then((result) => {
+    res.send(result);
+  });
+};
+
+module.exports.createAppointment = async (req, res) => {
+  const { name, doctor, date, complaint } = req.body;
+  await Appointments.create({
+    name: name,
+    doctor: doctor,
+    date: date,
+    complaint: complaint,
+  });
+  Appointments.find().then((result) => res.send(result));
 };
