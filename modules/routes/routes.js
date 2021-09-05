@@ -1,4 +1,4 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
 
 const {
@@ -6,10 +6,14 @@ const {
   login,
   getAllAppointments,
   createAppointment,
-} = require("../controllers/item.controller");
+  editAppointment,
+  deleteAppointments,
+} = require('../controllers/item.controller');
 
-router.post("/register", register);
-router.post("/login", login);
-router.get("/general", getAllAppointments);
-router.post("/createAppointment", createAppointment);
+router.post('/register', register);
+router.post('/login', login);
+router.get('/general', getAllAppointments);
+router.post('/createAppointment', createAppointment);
+router.post('/editAppointment', editAppointment);
+router.post('/deleteAppointments', deleteAppointments);
 module.exports = router;

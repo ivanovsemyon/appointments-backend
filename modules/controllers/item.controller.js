@@ -1,6 +1,6 @@
-const { Schema, connect, model } = require("mongoose");
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
+const { Schema, connect, model } = require('mongoose');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 const userSchema = new Schema({
   login: String,
@@ -16,15 +16,15 @@ const appointmentsSchema = new Schema({
 });
 
 connect(
-  "mongodb+srv://semyonivanov:semyonivanov@cluster0.6g7e8.mongodb.net/Appointments?retryWrites=true&w=majority",
+  'mongodb+srv://semyonivanov:semyonivanov@cluster0.6g7e8.mongodb.net/Appointments?retryWrites=true&w=majority',
   {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   }
 );
 
-const Appointments = model("appointments", appointmentsSchema);
-const User = model("users", userSchema);
+const Appointments = model('appointments', appointmentsSchema);
+const User = model('users', userSchema);
 
 module.exports.register = async (req, res) => {
   const { login, password, repeatPassword } = req.body;
@@ -38,22 +38,22 @@ module.exports.register = async (req, res) => {
     if (validLogin) {
       return res
         .status(400)
-        .send({ login: "Длина логина должна быть не менее 6 символов" });
+        .send({ login: 'Длина логина должна быть не менее 6 символов' });
     }
     if (!validPassword) {
       return res.status(400).send({
         password:
-          "Длина пароля должна быть не меньше 6 символов, обязательно состоять из латинских символов и содержать число",
+          'Длина пароля должна быть не меньше 6 символов, обязательно состоять из латинских символов и содержать число',
       });
     }
     if (password !== repeatPassword) {
       return res.status(400).send({
-        repeatPassword: "Пароли не совпадают",
+        repeatPassword: 'Пароли не совпадают',
       });
     }
 
     if (candidate) {
-      return res.status(400).send({ login: "Такой логин уже существует" });
+      return res.status(400).send({ login: 'Такой логин уже существует' });
     }
 
     const hashedPassword = await bcrypt.hash(password, 4);
@@ -65,14 +65,14 @@ module.exports.register = async (req, res) => {
 
     user.token = await jwt.sign(
       { login: user.login, password: user.password },
-      "secret",
+      'secret',
       {
-        expiresIn: "2h",
+        expiresIn: '2h',
       }
     );
     res.status(201).json({ login: user.login, token: user.token });
   } else {
-    res.status(400).send("Введите корректные данные");
+    res.status(400).send('Введите корректные данные');
   }
 };
 
@@ -83,17 +83,17 @@ module.exports.login = async (req, res) => {
     if (user && (await bcrypt.compare(password, user.password))) {
       user.token = await jwt.sign(
         { login: user.login, token: user.token },
-        "secret",
+        'secret',
         {
-          expiresIn: "2h",
+          expiresIn: '2h',
         }
       );
       res.status(201).json({ login: user.login, token: user.token });
     } else {
-      res.status(400).send({ error: "Логин или пароль не верны" });
+      res.status(400).send({ error: 'Логин или пароль не верны' });
     }
   } else {
-    res.status(400).send({ error: "Недостаточно данных" });
+    res.status(400).send({ error: 'Недостаточно данных' });
   }
 };
 
@@ -112,4 +112,15 @@ module.exports.createAppointment = async (req, res) => {
     complaint: complaint,
   });
   Appointments.find().then((result) => res.send(result));
+};
+
+module.exports.editAppointment = async (res, req) => {
+  const body = req.body;
+  Appointments.updateOne({ _id: body._id }, { ...body });
+  Appointments.find().then((result) => res.send(result));
+};
+
+module.exports.deleteAppointments = async (res, req) => {
+  await Appointments.deleteOne({ _id: req.query.id });
+  Appointments.find.then((result) => res.send(result));
 };
