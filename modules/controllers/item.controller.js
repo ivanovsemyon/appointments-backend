@@ -1,6 +1,7 @@
 const { Schema, connect, model } = require("mongoose");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const moment = require("moment");
 
 const userSchema = new Schema({
   login: String,
@@ -129,9 +130,13 @@ module.exports.createAppointment = async (req, res) => {
 
 module.exports.editAppointment = async (req, res) => {
   const body = req.body;
-  console.log(body);
-  await Appointments.updateOne({ _id: body._id }, { ...body });
-  await Appointments.find().then((result) => res.send(result));
+  const date = moment(body.date, "YYYY-MM-DD").format("YYYY-MM-DD");
+  if (body._id) {
+    await Appointments.updateOne({ _id: body._id }, { date, ...body });
+    await Appointments.find().then((result) => res.send(result));
+  } else {
+    res.status(400).send({ error: "Некорректные данные" });
+  }
 };
 
 module.exports.deleteAppointments = async (req, res) => {
