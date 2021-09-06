@@ -114,22 +114,31 @@ module.exports.getAllAppointments = async (req, res) => {
 
 module.exports.createAppointment = async (req, res) => {
   const { name, doctor, date, complaint } = req.body;
-  await Appointments.create({
-    name: name,
-    doctor: doctor,
-    date: date,
-    complaint: complaint,
-  });
-  Appointments.find().then((result) => res.send(result));
+  if (name && doctor && date && complaint) {
+    await Appointments.create({
+      name: name,
+      doctor: doctor,
+      date: date,
+      complaint: complaint,
+    });
+    Appointments.find().then((result) => res.send(result));
+  } else {
+    res.status(400).send({ error: "Заполните все поля" });
+  }
 };
 
-module.exports.editAppointment = async (res, req) => {
+module.exports.editAppointment = async (req, res) => {
   const body = req.body;
-  Appointments.updateOne({ _id: body._id }, { ...body });
-  Appointments.find().then((result) => res.send(result));
+  console.log(body);
+  await Appointments.updateOne({ _id: body._id }, { ...body });
+  await Appointments.find().then((result) => res.send(result));
 };
 
-module.exports.deleteAppointments = async (res, req) => {
-  await Appointments.deleteOne({ _id: req.query.id });
-  Appointments.find.then((result) => res.send(result));
+module.exports.deleteAppointments = async (req, res) => {
+  if (req.query.id) {
+    await Appointments.deleteOne({ _id: req.query.id });
+    Appointments.find().then((result) => res.send(result));
+  } else {
+    res.status(400).send({ error: "Некорректный id" });
+  }
 };
