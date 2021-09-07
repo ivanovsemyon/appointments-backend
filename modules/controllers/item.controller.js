@@ -130,9 +130,8 @@ module.exports.createAppointment = async (req, res) => {
 
 module.exports.editAppointment = async (req, res) => {
   const body = req.body;
-  const date = moment(body.date, "YYYY-MM-DD").format("YYYY-MM-DD");
   if (body._id) {
-    await Appointments.updateOne({ _id: body._id }, { date, ...body });
+    await Appointments.updateOne({ _id: body._id }, { ...body });
     await Appointments.find().then((result) => res.send(result));
   } else {
     res.status(400).send({ error: "Некорректные данные" });
