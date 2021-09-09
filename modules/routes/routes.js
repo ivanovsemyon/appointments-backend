@@ -5,16 +5,19 @@ const {
   verifyToken,
   register,
   login,
+} = require("../controllers/user.controller");
+
+const {
   getAllAppointments,
   createAppointment,
   editAppointment,
   deleteAppointments,
-} = require("../controllers/item.controller");
+} = require("../controllers/appointment.controller");
 
 router.post("/verify", verifyToken);
-router.post("/register", register);
-router.post("/login", login);
-router.get("/general", getAllAppointments);
+router.post("/registrationUser", register);
+router.post("/loginUser", login);
+router.get("/getAllAppointments", getAllAppointments);
 router.post("/createAppointment", createAppointment);
 router.post("/editAppointment", editAppointment);
 router.delete("/deleteAppointments", deleteAppointments);
