@@ -41,8 +41,17 @@ module.exports.createAppointment = async (req, res) => {
 module.exports.editAppointment = async (req, res) => {
   const body = req.body;
   if (body._id) {
-    await Appointments.updateOne({ _id: body._id }, { ...body });
-    await Appointments.find().then((result) => res.send(result));
+    if (
+      body.name !== "" &&
+      body.doctor !== "" &&
+      body.date !== "" &&
+      body.complaint !== ""
+    ) {
+      await Appointments.updateOne({ _id: body._id }, { ...body });
+      await Appointments.find().then((result) => res.send(result));
+    } else {
+      res.status(400).send({ error: "Все поля должны быть заполнены" });
+    }
   } else {
     res.status(400).send({ error: "Некорректные данные" });
   }
