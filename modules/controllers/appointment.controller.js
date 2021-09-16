@@ -32,12 +32,12 @@ module.exports.createAppointment = async (req, res) => {
       date: date,
       complaint: complaint,
     });
-    Appointments.find().then((result) => res.send(result));
+    Appointments.find(req.body).then((result) => res.status(200).send(result));
   } else {
     res.status(400).send({ error: "Заполните все поля" });
   }
 };
-
+//TODO: если данные не изменились, то запрос отправлять не нужно
 module.exports.editAppointment = async (req, res) => {
   const body = req.body;
   if (body._id) {
@@ -48,7 +48,9 @@ module.exports.editAppointment = async (req, res) => {
       body.complaint !== ""
     ) {
       await Appointments.updateOne({ _id: body._id }, { ...body });
-      await Appointments.find().then((result) => res.send(result));
+      await Appointments.find(req.body).then((result) =>
+        res.status(200).send(result)
+      );
     } else {
       res.status(400).send({ error: "Все поля должны быть заполнены" });
     }
@@ -60,7 +62,7 @@ module.exports.editAppointment = async (req, res) => {
 module.exports.deleteAppointments = async (req, res) => {
   if (req.query.id) {
     await Appointments.deleteOne({ _id: req.query.id });
-    Appointments.find().then((result) => res.send(result));
+    await res.status(200).send({ massage: "Приём удалён" });
   } else {
     res.status(400).send({ error: "Некорректный id" });
   }
