@@ -18,23 +18,34 @@ connect(
 const Appointments = model("appointments", appointmentsSchema);
 
 module.exports.getAllAppointments = async (req, res) => {
-  Appointments.find().then((result) => {
-    res.send(result);
-  });
+  try {
+    Appointments.find().then((result) => {
+      res.send(result);
+    });
+  } catch (e) {
+    res.status(400).send({ massage: "При загрузке произошла ошибка", e });
+  }
 };
 
 module.exports.createAppointment = async (req, res) => {
   const { name, doctor, date, complaint } = req.body;
-  if (name && doctor && date && complaint) {
-    await Appointments.create({
-      name: name,
-      doctor: doctor,
-      date: date,
-      complaint: complaint,
-    });
-    Appointments.find(req.body).then((result) => res.status(200).send(result));
-  } else {
-    res.status(400).send({ error: "Заполните все поля" });
+
+  try {
+    if (name && doctor && date && complaint) {
+      await Appointments.create({
+        name,
+        doctor,
+        date,
+        complaint,
+      });
+      Appointments.find(req.body).then((result) =>
+        res.status(200).send(result)
+      );
+    } else {
+      throw { error: "Заполните все поля" };
+    }
+  } catch (err) {
+    res.status(400).send({ massage: "Ошибка", err });
   }
 };
 //TODO: если данные не изменились, то запрос отправлять не нужно
@@ -61,8 +72,12 @@ module.exports.editAppointment = async (req, res) => {
 
 module.exports.deleteAppointments = async (req, res) => {
   if (req.query.id) {
-    await Appointments.deleteOne({ _id: req.query.id });
-    await res.status(200).send({ massage: "Приём удалён" });
+    try {
+      await Appointments.deleteOne({ _id: req.query.id });
+      await res.status(200).send({ massage: "Приём удалён" });
+    } catch (e) {
+      res.status(400).send({ error: e });
+    }
   } else {
     res.status(400).send({ error: "Некорректный id" });
   }
