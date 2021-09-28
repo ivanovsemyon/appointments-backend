@@ -1,5 +1,4 @@
 const { Schema, connect, model } = require("mongoose");
-const { appointmentsURI } = require("../../.env");
 
 const appointmentsSchema = new Schema({
   name: String,
@@ -8,7 +7,7 @@ const appointmentsSchema = new Schema({
   complaint: String,
 });
 
-connect(appointmentsURI, {
+connect(process.env.USER_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
@@ -44,6 +43,7 @@ module.exports.createAppointment = async (req, res) => {
     res.status(400).send({ massage: "Ошибка", err });
   }
 };
+
 //TODO: если данные не изменились, то запрос отправлять не нужно
 module.exports.editAppointment = async (req, res) => {
   const body = req.body;

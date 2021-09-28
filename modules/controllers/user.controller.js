@@ -1,7 +1,6 @@
 const { Schema, connect, model } = require("mongoose");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const { usersURI } = require("../../.env");
 
 const userSchema = new Schema({
   login: String,
@@ -9,7 +8,7 @@ const userSchema = new Schema({
   token: String,
 });
 
-connect(usersURI, {
+connect(process.env.USER_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
