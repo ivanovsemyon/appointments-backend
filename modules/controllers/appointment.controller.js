@@ -1,4 +1,5 @@
 const { Schema, connect, model } = require("mongoose");
+const { appointmentsURI } = require("../../.env.local");
 
 const appointmentsSchema = new Schema({
   name: String,
@@ -7,13 +8,10 @@ const appointmentsSchema = new Schema({
   complaint: String,
 });
 
-connect(
-  "mongodb+srv://semyonivanov:semyonivanov@cluster0.6g7e8.mongodb.net/Appointments?retryWrites=true&w=majority",
-  {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  }
-);
+connect(appointmentsURI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
 
 const Appointments = model("appointments", appointmentsSchema);
 

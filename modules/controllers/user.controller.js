@@ -1,6 +1,7 @@
 const { Schema, connect, model } = require("mongoose");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const { usersURI } = require("../../.env.local");
 
 const userSchema = new Schema({
   login: String,
@@ -8,13 +9,10 @@ const userSchema = new Schema({
   token: String,
 });
 
-connect(
-  "mongodb+srv://semyonivanov:semyonivanov@cluster0.6g7e8.mongodb.net/Appointments?retryWrites=true&w=majority",
-  {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  }
-);
+connect(usersURI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
 
 const User = model("users", userSchema);
 
