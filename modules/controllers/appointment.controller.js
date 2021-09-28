@@ -1,5 +1,5 @@
 const { Schema, connect, model } = require("mongoose");
-const { appointmentsURI } = require("../../.env.local");
+const { appointmentsURI } = require("../../.env");
 
 const appointmentsSchema = new Schema({
   name: String,
@@ -36,9 +36,7 @@ module.exports.createAppointment = async (req, res) => {
         date,
         complaint,
       });
-      Appointments.find(req.body).then((result) =>
-        res.status(200).send(result)
-      );
+      Appointments.find().then((result) => res.status(200).send(result));
     } else {
       throw { error: "Заполните все поля" };
     }
@@ -57,9 +55,7 @@ module.exports.editAppointment = async (req, res) => {
       body.complaint !== ""
     ) {
       await Appointments.updateOne({ _id: body._id }, { ...body });
-      await Appointments.find(req.body).then((result) =>
-        res.status(200).send(result)
-      );
+      await Appointments.find().then((result) => res.status(200).send(result));
     } else {
       res.status(400).send({ error: "Все поля должны быть заполнены" });
     }
@@ -72,7 +68,9 @@ module.exports.deleteAppointments = async (req, res) => {
   if (req.query.id) {
     try {
       await Appointments.deleteOne({ _id: req.query.id });
-      await res.status(200).send({ massage: "Приём удалён" });
+      await Appointments.find().then((result) => {
+        res.status(200).send(result);
+      });
     } catch (e) {
       res.status(400).send({ error: e });
     }
