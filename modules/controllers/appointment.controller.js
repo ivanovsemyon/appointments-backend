@@ -7,7 +7,7 @@ const appointmentsSchema = new Schema({
   complaint: String,
 });
 
-connect(process.env.USER_URI, {
+connect(process.env.URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
