@@ -17,8 +17,8 @@ const {
 router.post("/verify", verifyToken);
 router.post("/registrationUser", register);
 router.post("/loginUser", login);
-router.get("/getAllAppointments", getAllAppointments);
-router.post("/createAppointment", createAppointment);
-router.post("/editAppointment", editAppointment);
-router.delete("/deleteAppointments", deleteAppointments);
+router.get("/getAllAppointments", verifyToken, getAllAppointments);
+router.post("/createAppointment", verifyToken, createAppointment);
+router.post("/editAppointment", verifyToken, editAppointment);
+router.delete("/deleteAppointments", verifyToken, deleteAppointments);
 module.exports = router;

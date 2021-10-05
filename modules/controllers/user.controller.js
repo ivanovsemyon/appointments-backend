@@ -15,7 +15,19 @@ connect(process.env.URI, {
 
 const User = model("users", userSchema);
 
-module.exports.verifyToken = (req, res) => {
+const { TokenExpiredError } = jwt;
+
+const catchError = (err, res) => {
+  if (err instanceof TokenExpiredError) {
+    return res
+      .status(401)
+      .send({ message: "Unauthorized! Access Token was expired!" });
+  }
+
+  return res.sendStatus(401).send({ message: "Unauthorized!" });
+};
+
+module.exports.verifyToken = (req, res, next) => {
   const token =
     req.body.token || req.query.token || req.headers["x-access-token"];
 
@@ -23,11 +35,14 @@ module.exports.verifyToken = (req, res) => {
     return res.status(403).send("A token is required for authentication");
   }
   try {
-    req.user = jwt.verify(token, "secret");
-    res.send({ isLogin: true });
+    jwt.verify(token, "secret", function (err, decoded) {
+      if (err) return catchError(err, res);
+      req.decoded = decoded;
+    });
   } catch (err) {
     return res.status(401).send("Invalid Token");
   }
+  return next();
 };
 
 module.exports.register = async (req, res) => {
@@ -81,12 +96,20 @@ module.exports.login = async (req, res) => {
   const { login, password } = req.body;
   if (login && password) {
     const user = await User.findOne({ login });
-    if (user && (await bcrypt.compare(password, user.password))) {
-      user.token = await jwt.sign(
-        { login: user.login, token: user.token },
-        "secret"
+    if (user && bcrypt.compare(password, user.password)) {
+      user.token = jwt.sign({ token: user.token }, "secret", {
+        expiresIn: 60,
+      });
+      user.refreshToken = jwt.sign(
+        { token: user.refreshToken },
+        "refreshTokenSecret",
+        {
+          expiresIn: 120,
+        }
       );
-      res.status(201).json({ login: user.login, token: user.token });
+      res
+        .status(201)
+        .json({ token: user.token, refreshToken: user.refreshToken });
     } else {
       res.status(400).send({ error: "Логин или пароль не верны" });
     }

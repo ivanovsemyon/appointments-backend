@@ -16,7 +16,7 @@ const Appointments = model("appointments", appointmentsSchema);
 
 module.exports.getAllAppointments = async (req, res) => {
   try {
-    Appointments.find().then((result) => {
+    await Appointments.find().then((result) => {
       res.send(result);
     });
   } catch (e) {
@@ -35,7 +35,7 @@ module.exports.createAppointment = async (req, res) => {
         date,
         complaint,
       });
-      Appointments.find().then((result) => res.status(200).send(result));
+      await Appointments.find().then((result) => res.status(200).send(result));
     } else {
       throw { error: "Заполните все поля" };
     }
@@ -44,7 +44,6 @@ module.exports.createAppointment = async (req, res) => {
   }
 };
 
-//TODO: если данные не изменились, то запрос отправлять не нужно
 module.exports.editAppointment = async (req, res) => {
   const body = req.body;
   if (body._id) {
