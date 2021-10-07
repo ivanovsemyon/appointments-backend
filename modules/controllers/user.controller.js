@@ -19,30 +19,30 @@ const { TokenExpiredError } = jwt;
 
 const catchError = (err, res) => {
   if (err instanceof TokenExpiredError) {
-    return res
-      .status(401)
-      .send({ message: "Unauthorized! Access Token was expired!" });
+    return res.status(401).send({
+      message: "Unauthorized! Access Token was expired!",
+      expired: true,
+    });
   }
-
-  return res.sendStatus(401).send({ message: "Unauthorized!" });
+  return res.status(401).send({ message: "Unauthorized!", unauthorized: true });
 };
 
 module.exports.verifyToken = (req, res, next) => {
   const token =
     req.body.token || req.query.token || req.headers["x-access-token"];
-
   if (!token) {
-    return res.status(403).send("A token is required for authentication");
-  }
-  try {
-    jwt.verify(token, "secret", function (err, decoded) {
-      if (err) return catchError(err, res);
-      req.decoded = decoded;
+    return res.status(403).send({
+      message: "No token provided!",
+      unauthorized: true,
     });
-  } catch (err) {
-    return res.status(401).send("Invalid Token");
   }
-  return next();
+  jwt.verify(token, "secret", function (err, decoded) {
+    if (err) {
+      return catchError(err, res);
+    }
+    req.decoded = decoded;
+    next();
+  });
 };
 
 module.exports.register = async (req, res) => {
